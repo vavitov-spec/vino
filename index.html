@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Wine Cellar">
+    <meta name="theme-color" content="#722f37">
+    <title>Wine Cellar Tracker</title>
+    <style>
+        :root {
+            --color-primary: #722f37;
+            --color-primary-hover: #8b3a45;
+            --color-surface: #f5f1e8;
+            --color-text: #2c2416;
+            --color-border: #d4ccc0;
+            --color-success: #2d8659;
+            --color-error: #c01530;
+            --color-warn: #a84f2f;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--color-surface);
+            color: var(--color-text);
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 28px;
+            color: var(--color-primary);
+            margin-bottom: 8px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--color-primary);
+            border-bottom: 2px solid var(--color-primary);
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            color: var(--color-text);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--color-text);
+            background: white;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 250ms ease;
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+        }
+
+        .btn-secondary {
+            background: #f0ece3;
+            color: var(--color-primary);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: #e8dfd4;
+        }
+
+        .btn-danger {
+            background: var(--color-error);
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        .btn-danger:hover {
+            background: #a01225;
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #1f5f3f;
+        }
+
+        .photo-preview {
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .photo-preview img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 2px solid var(--color-border);
+        }
+
+        .wine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .wine-card {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: box-shadow 250ms ease;
+        }
+
+        .wine-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .wine-image {
+            width: 100%;
+            height: 160px;
+            background: #eee;
+            object-fit: cover;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .wine-info {
+            padding: 12px;
+        }
+
+        .wine-name {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: var(--color-primary);
+        }
+
+        .wine-detail {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .wine-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .wine-actions button {
+            flex: 1;
+            padding: 6px 10px;
+            font-size: 11px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 250ms ease;
+        }
+
+        .btn-drink {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-drink:hover {
+            background: #1f5f3f;
+        }
+
+        .btn-delete {
+            background: #f0ece3;
+            color: var(--color-error);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-delete:hover {
+            background: #e8ddf0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            border-bottom: 2px solid var(--color-border);
+        }
+
+        .tab {
+            padding: 10px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #999;
+            font-size: 14px;
+            border-bottom: 3px solid transparent;
+            transition: all 250ms ease;
+        }
+
+        .tab.active {
+            color: var(--color-primary);
+            border-bottom-color: var(--color-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+
+        .voice-recorder {
+            background: #f9f6f0;
+            border: 2px dashed var(--color-primary);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .recording-indicator {
+            color: var(--color-error);
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .voice-list {
+            margin-top: 12px;
+        }
+
+        .voice-item {
+            background: #f9f6f0;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .voice-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--color-primary);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .tasting-notes {
+            background: #f9f6f0;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .price-badge {
+            background: var(--color-warn);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #f9f6f0 0%, #f5f1e8 100%);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stats-card-title {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .stats-card-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--color-primary);
+            margin-bottom: 4px;
+        }
+
+        .stats-card-subtitle {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .chart-container {
+            background: white;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--color-primary);
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍇 Мой винный погреб</h1>
+            <p>Отслеживайте и записывайте свою коллекцию вин</p>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">Всего бутылок в наличии</div>
+                    <div class="stat-value" id="totalWines">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Стоимость в наличии</div>
+                    <div class="stat-value" id="totalWinesPrice">0₽</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Выпито (всего)</div>
+                    <div class="stat-value" id="totalDrunk">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Выпито (стоимость)</div>
+                    <div class="stat-value" id="totalDrunkPrice">0₽</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Статистика выпитого по месяцам -->
+        <div class="stats-grid">
+            <div class="stats-card">
+                <div class="stats-card-title">Выпито в этом месяце</div>
+                <div class="stats-card-value" id="monthBottles">0</div>
+                <div class="stats-card-subtitle">бутылок</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-title">Потрачено в этом месяце</div>
+                <div class="stats-card-value" id="monthCost">0₽</div>
+                <div class="stats-card-subtitle">на выпитое вино</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-title">Среднее за месяц</div>
+                <div class="stats-card-value" id="avgCost">0₽</div>
+                <div class="stats-card-subtitle">среднее расходование</div>
+            </div>
+            <div class="stats-card">
+                <div class="stats-card-title">Самый популярный месяц</div>
+                <div class="stats-card-value" id="topMonth">—</div>
+                <div class="stats-card-subtitle">по количеству бутылок</div>
+            </div>
+        </div>
+
+        <!-- Диаграмма выпитого по месяцам -->
+        <div class="chart-container">
+            <div class="chart-title">📊 Статистика по месяцам (последние 12 месяцев)</div>
+            <canvas id="monthlyChart" style="max-height: 300px;"></canvas>
+        </div>
+
+        <div class="main-layout">
+            <!-- Левая панель: добавление вина -->
+            <div class="panel">
+                <div class="panel-title">Добавить вино</div>
+                
+                <form id="addWineForm">
+                    <div class="form-group">
+                        <label>Фото этикетки</label>
+                        <input type="file" id="winePhoto" accept="image/*" capture="environment">
+                        <div class="photo-preview" id="photoPreview"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Название вина</label>
+                        <input type="text" id="wineName" placeholder="Напр. Pinot Noir 2018" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Страна/Регион</label>
+                        <input type="text" id="wineRegion" placeholder="Напр. Франция, Бургундия">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Стоимость покупки (₽)</label>
+                        <input type="number" id="winePrice" placeholder="2500" min="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Где куплено</label>
+                        <input type="text" id="wineBought" placeholder="Напр. Винотека на Арбате">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Заметки</label>
+                        <textarea id="wineNotes" placeholder="Дополнительная информация о вине..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Добавить в погреб</button>
+                </form>
+            </div>
+
+            <!-- Правая панель: коллекция вин -->
+            <div class="panel">
+                <div class="panel-title">Моя коллекция</div>
+                
+                <div class="tabs">
+                    <button class="tab active" data-tab="available">Имеется (В наличии)</button>
+                    <button class="tab" data-tab="drunk">Выпито (Заметки)</button>
+                </div>
+
+                <div id="available" class="tab-content active">
+                    <div class="wine-grid" id="wineGrid">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🍷</div>
+                            <p>Погреб пуст. Добавьте первое вино!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="drunk" class="tab-content">
+                    <div id="drunkList">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">✓</div>
+                            <p>Вы еще не пробовали вина из коллекции</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно для записи впечатлений -->
+    <div id="drinkModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeDrinkModal()">✕</button>
+            <div class="modal-header">Мои впечатления о вине</div>
+            
+            <div id="currentWineInfo" style="margin-bottom: 16px;"></div>
+
+            <div class="form-group">
+                <label>Рейтинг (1-10)</label>
+                <input type="number" id="drinkRating" min="1" max="10" placeholder="7">
+            </div>
+
+            <div class="form-group">
+                <label>Записать голосовое описание</label>
+                <div class="voice-recorder">
+                    <button type="button" class="btn btn-secondary" id="recordBtn" onclick="toggleRecord()">
+                        🎤 Начать запись
+                    </button>
+                    <div class="recording-indicator" id="recordingStatus"></div>
+                </div>
+                <div class="voice-list" id="voiceList"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Или напишите заметку</label>
+                <textarea id="drinkNotes" placeholder="Описание вкуса, аромата, пищевых пар..."></textarea>
+            </div>
+
+            <button type="button" class="btn btn-success" onclick="saveDrinkRecord()">Сохранить впечатления</button>
+            <button type="button" class="btn btn-secondary" onclick="closeDrinkModal()" style="margin-top: 8px;">Закрыть</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script>
+        let wines = JSON.parse(localStorage.getItem('wines')) || [];
+        let drunkWines = JSON.parse(localStorage.getItem('drunkWines')) || [];
+        let mediaRecorder;
+        let audioChunks = [];
+        let currentWineId = null;
+        let isRecording = false;
+        let monthlyChart = null;
+
+        // === УПРАВЛЕНИЕ ВИНОМ ===
+
+        document.getElementById('addWineForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('wineName').value.trim();
+            const region = document.getElementById('wineRegion').value.trim();
+            const price = document.getElementById('winePrice').value.trim();
+            const bought = document.getElementById('wineBought').value.trim();
+            const notes = document.getElementById('wineNotes').value.trim();
+            const photo = document.getElementById('winePhoto').files[0];
+
+            // Проверка обязательного поля
+            if (!name) {
+                alert('⚠️ Пожалуйста, введите название вина');
+                return;
+            }
+
+            // Функция сохранения вина
+            const saveWine = (photoData) => {
+                const wine = {
+                    id: Date.now(),
+                    name: name,
+                    region: region,
+                    price: price,
+                    bought: bought,
+                    notes: notes,
+                    photo: photoData,
+                    dateAdded: new Date().toLocaleDateString('ru-RU')
+                };
+
+                wines.push(wine);
+                localStorage.setItem('wines', JSON.stringify(wines));
+                document.getElementById('addWineForm').reset();
+                document.getElementById('photoPreview').innerHTML = '';
+                renderWines();
+                updateStats();
+                alert('✓ Вино добавлено в погреб!');
+            };
+
+            // Если есть фото, загрузить его
+            if (photo) {
+                const reader = new FileReader();
+                reader.onerror = function() {
+                    alert('Ошибка при загрузке фото');
+                };
+                reader.onload = function(e) {
+                    saveWine(e.target.result);
+                };
+                reader.readAsDataURL(photo);
+            } else {
+                // Сохранить без фото
+                saveWine(null);
+            }
+        });
+
+        document.getElementById('winePhoto').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('photoPreview').innerHTML = 
+                        `<img src="${e.target.result}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function renderWines() {
+            const grid = document.getElementById('wineGrid');
+            
+            if (wines.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🍷</div>
+                        <p>Погреб пуст. Добавьте первое вино!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = wines.map(wine => `
+                <div class="wine-card">
+                    ${wine.photo ? `<img src="${wine.photo}" class="wine-image">` : 
+                      `<div class="wine-image" style="display: flex; align-items: center; justify-content: center; background: #f0ece3;">🍷</div>`}
+                    <div class="wine-info">
+                        <div class="wine-name">${wine.name}</div>
+                        <div class="wine-detail">📍 ${wine.region || 'Не указано'}</div>
+                        ${wine.price ? `<div class="wine-detail"><span class="price-badge">${wine.price}₽</span></div>` : ''}
+                        ${wine.bought ? `<div class="wine-detail">🏪 ${wine.bought}</div>` : ''}
+                        <div class="wine-detail" style="font-size: 11px; color: #999; margin-top: 6px;">Добавлено: ${wine.dateAdded}</div>
+                        <div class="wine-actions">
+                            <button class="btn-drink" onclick="openDrinkModal(${wine.id})">Выпить</button>
+                            <button class="btn-delete" onclick="deleteWine(${wine.id})">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteWine(id) {
+            if (confirm('Удалить это вино из погреба?')) {
+                wines = wines.filter(w => w.id !== id);
+                localStorage.setItem('wines', JSON.stringify(wines));
+                renderWines();
+                updateStats();
+            }
+        }
+
+        // === ЗАПИСЬ ВПЕЧАТЛЕНИЙ ===
+
+        function openDrinkModal(id) {
+            currentWineId = id;
+            const wine = wines.find(w => w.id === id);
+            
+            document.getElementById('currentWineInfo').innerHTML = `
+                <div style="background: #f9f6f0; padding: 12px; border-radius: 6px; border-left: 4px solid var(--color-primary);">
+                    <strong>${wine.name}</strong><br>
+                    <small style="color: #666;">${wine.region || ''}</small>
+                </div>
+            `;
+
+            document.getElementById('drinkRating').value = '';
+            document.getElementById('drinkNotes').value = '';
+            audioChunks = [];
+            document.getElementById('voiceList').innerHTML = '';
+            document.getElementById('recordingStatus').innerHTML = '';
+            document.getElementById('recordBtn').textContent = '🎤 Начать запись';
+            isRecording = false;
+
+            document.getElementById('drinkModal').classList.add('show');
+        }
+
+        function closeDrinkModal() {
+            document.getElementById('drinkModal').classList.remove('show');
+            if (isRecording) toggleRecord();
+        }
+
+        // === ГОЛОСОВАЯ ЗАПИСЬ ===
+
+        async function toggleRecord() {
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        
+                        const voiceList = document.getElementById('voiceList');
+                        const voiceItem = document.createElement('div');
+                        voiceItem.className = 'voice-item';
+                        voiceItem.innerHTML = `
+                            <div>
+                                <audio controls style="height: 24px; max-width: 200px;">
+                                    <source src="${audioUrl}" type="audio/webm">
+                                </audio>
+                                <div class="voice-time">${new Date().toLocaleTimeString('ru-RU')}</div>
+                            </div>
+                            <button type="button" class="btn-delete" onclick="this.parentElement.remove()">✕</button>
+                        `;
+                        voiceList.appendChild(voiceItem);
+                        
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+                    document.getElementById('recordBtn').textContent = '⏹ Остановить запись';
+                    document.getElementById('recordingStatus').textContent = '🔴 Идет запись...';
+                } catch (error) {
+                    alert('Не удалось получить доступ к микрофону. Проверьте разрешения браузера.');
+                    console.error('Ошибка микрофона:', error);
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                document.getElementById('recordBtn').textContent = '🎤 Начать запись';
+                document.getElementById('recordingStatus').textContent = '';
+            }
+        }
+
+        function saveDrinkRecord() {
+            const wine = wines.find(w => w.id === currentWineId);
+            const rating = document.getElementById('drinkRating').value;
+            const notes = document.getElementById('drinkNotes').value;
+            const voiceItems = document.getElementById('voiceList').querySelectorAll('.voice-item');
+
+            const record = {
+                id: Date.now(),
+                wineId: currentWineId,
+                wineName: wine.name,
+                winePrice: wine.price,
+                rating: rating || 'Не оценено',
+                notes: notes,
+                voiceCount: voiceItems.length,
+                dateTasted: new Date().toLocaleDateString('ru-RU')
+            };
+
+            drunkWines.push(record);
+            localStorage.setItem('drunkWines', JSON.stringify(drunkWines));
+            
+            wines = wines.filter(w => w.id !== currentWineId);
+            localStorage.setItem('wines', JSON.stringify(wines));
+
+            renderWines();
+            renderDrunkWines();
+            updateStats();
+            closeDrinkModal();
+
+            alert('✓ Впечатления сохранены!');
+        }
+
+        function renderDrunkWines() {
+            const list = document.getElementById('drunkList');
+            
+            if (drunkWines.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">✓</div>
+                        <p>Вы еще не пробовали вина из коллекции</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = `
+                <div style="display: grid; gap: 12px;">
+                    ${drunkWines.map(record => `
+                        <div style="background: white; border: 1px solid var(--color-border); border-radius: 8px; padding: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                                <div>
+                                    <div style="font-weight: 600; color: var(--color-primary); margin-bottom: 4px;">${record.wineName}</div>
+                                    <div style="font-size: 12px; color: #666;">Попробовано: ${record.dateTasted}</div>
+                                </div>
+                                <button class="btn-delete" onclick="deleteDrunkWine(${record.id})">✕</button>
+                            </div>
+                            ${record.rating !== 'Не оценено' ? `<div style="margin: 8px 0;"><strong>Рейтинг:</strong> ⭐ ${record.rating}/10</div>` : ''}
+                            ${record.price ? `<div style="font-size: 12px; color: #666;"><strong>Стоимость:</strong> ${record.price}₽</div>` : ''}
+                            ${record.voiceCount > 0 ? `<div style="font-size: 12px; color: var(--color-success); margin: 8px 0;"><strong>🎙️ Голосовых заметок:</strong> ${record.voiceCount}</div>` : ''}
+                            ${record.notes ? `<div class="tasting-notes"><strong>Заметки:</strong> ${record.notes}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function deleteDrunkWine(id) {
+            if (confirm('Удалить запись о вине?')) {
+                drunkWines = drunkWines.filter(w => w.id !== id);
+                localStorage.setItem('drunkWines', JSON.stringify(drunkWines));
+                renderDrunkWines();
+                updateStats();
+            }
+        }
+
+        // === ВКЛАДКИ ===
+
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                document.getElementById(this.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === СТАТИСТИКА ===
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('ru-RU').format(price) + '₽';
+        }
+
+        function getMonthlyStats() {
+            const monthlyData = {};
+            const months = [];
+            const currentDate = new Date();
+
+            // Инициализируем последние 12 месяцев
+            for (let i = 11; i >= 0; i--) {
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+                const monthKey = date.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+                const monthNum = String(date.getMonth() + 1).padStart(2, '0');
+                const yearNum = date.getFullYear();
+                const key = `${yearNum}-${monthNum}`;
+                monthlyData[key] = { bottles: 0, cost: 0, label: monthKey };
+                months.push(key);
+            }
+
+            // Подсчитываем выпитое вино по месяцам
+            drunkWines.forEach(record => {
+                const dateParts = record.dateTasted.split('.');
+                if (dateParts.length === 3) {
+                    const day = parseInt(dateParts[0]);
+                    const month = String(parseInt(dateParts[1])).padStart(2, '0');
+                    const year = parseInt(dateParts[2]);
+                    const key = `${year}-${month}`;
+                    
+                    if (monthlyData[key]) {
+                        monthlyData[key].bottles += 1;
+                        monthlyData[key].cost += parseInt(record.price) || 0;
+                    }
+                }
+            });
+
+            return { monthlyData, months };
+        }
+
+        function updateStats() {
+            // Общие статистики
+            const totalWinesPrice = wines.reduce((sum, w) => sum + (parseInt(w.price) || 0), 0);
+            const totalDrunkPrice = drunkWines.reduce((sum, w) => sum + (parseInt(w.winePrice) || 0), 0);
+
+            document.getElementById('totalWines').textContent = wines.length;
+            document.getElementById('totalWinesPrice').textContent = formatPrice(totalWinesPrice);
+            document.getElementById('totalDrunk').textContent = drunkWines.length;
+            document.getElementById('totalDrunkPrice').textContent = formatPrice(totalDrunkPrice);
+
+            // Статистика по месяцам
+            const { monthlyData, months } = getMonthlyStats();
+            const currentDate = new Date();
+            const currentMonthKey = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}`;
+            const currentMonthStats = monthlyData[currentMonthKey];
+
+            document.getElementById('monthBottles').textContent = currentMonthStats.bottles;
+            document.getElementById('monthCost').textContent = formatPrice(currentMonthStats.cost);
+
+            // Среднее расходование
+            const totalCost = Object.values(monthlyData).reduce((sum, m) => sum + m.cost, 0);
+            const avgCost = Math.round(totalCost / 12);
+            document.getElementById('avgCost').textContent = formatPrice(avgCost);
+
+            // Самый популярный месяц
+            let topMonthKey = null;
+            let maxBottles = 0;
+            Object.entries(monthlyData).forEach(([key, data]) => {
+                if (data.bottles > maxBottles) {
+                    maxBottles = data.bottles;
+                    topMonthKey = key;
+                }
+            });
+            const topMonthLabel = topMonthKey ? monthlyData[topMonthKey].label : '—';
+            document.getElementById('topMonth').textContent = topMonthLabel || '—';
+
+            // Обновляем диаграмму
+            updateMontlyChart(monthlyData, months);
+        }
+
+        function updateMontlyChart(monthlyData, months) {
+            const labels = months.map(m => monthlyData[m].label);
+            const bottlesData = months.map(m => monthlyData[m].bottles);
+            const costData = months.map(m => monthlyData[m].cost);
+
+            const ctx = document.getElementById('monthlyChart');
+            if (!ctx) return;
+
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+
+            monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Бутылок',
+                            data: bottlesData,
+                            backgroundColor: '#722f37',
+                            borderColor: '#722f37',
+                            borderWidth: 1,
+                            yAxisID: 'y',
+                            borderRadius: 6,
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Стоимость (₽)',
+                            data: costData,
+                            backgroundColor: '#d4ccc0',
+                            borderColor: '#a84f2f',
+                            borderWidth: 2,
+                            yAxisID: 'y1',
+                            borderRadius: 6,
+                            type: 'line',
+                            tension: 0.4,
+                            fill: false,
+                            pointBackgroundColor: '#a84f2f',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#2c2416',
+                                font: { size: 12, weight: 'bold' },
+                                padding: 16,
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Количество бутылок',
+                                color: '#722f37',
+                                font: { weight: 'bold' }
+                            },
+                            ticks: {
+                                color: '#666',
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: '#f0ece3'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Стоимость (₽)',
+                                color: '#a84f2f',
+                                font: { weight: 'bold' }
+                            },
+                            ticks: {
+                                color: '#666'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#666',
+                                font: { size: 11 }
+                            },
+                            grid: {
+                                color: '#f0ece3'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // === ИНИЦИАЛИЗАЦИЯ ===
+
+        renderWines();
+        renderDrunkWines();
+        updateStats();
+    </script>
+</body>
+</html>
